@@ -25,5 +25,7 @@ namespace QuizwanieServiceV3
 
         [Required]
         public string WrongAnswer3 { get; set; }
+
+        public int CreatorId { get; set; }
     }
 }

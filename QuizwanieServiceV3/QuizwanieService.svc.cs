@@ -81,15 +81,19 @@ namespace QuizwanieServiceV3
             return false;
         }
 
-        public List<User> getUsersRanking()
+        public List<User> getUsersRanking(string userName, string password)
         {
-            var usersList =  context.UserSet.OrderByDescending(user => user.Points).ToList();
             List<User> users = new List<User>();
-            foreach (var user in usersList)
+            var validatedUser = ValidateUser(userName, password);
+            if (validatedUser != null)
             {
-                if (!user.Role.Equals("Admin"))
+                var usersList = context.UserSet.OrderByDescending(user => user.Points).ToList();
+                foreach (var user in usersList)
                 {
-                    users.Add(new User(user));
+                    if (!user.Role.Equals("Admin"))
+                    {
+                        users.Add(new User(user));
+                    }
                 }
             }
             return users;
@@ -133,6 +137,7 @@ namespace QuizwanieServiceV3
             questionSet.WrongAnswer1 = wrongAnswer1;
             questionSet.WrongAnswer2 = wrongAnswer2;
             questionSet.WrongAnswer3 = wrongAnswer3;
+            questionSet.CreatorId = user.Id;
             context.UnauthorizedQuestionsSet.Add(questionSet);
             context.SaveChanges();
 
@@ -183,6 +188,14 @@ namespace QuizwanieServiceV3
                         WrongAnswer2 = unauthorizedQuestion.WrongAnswer2,
                         WrongAnswer3 = unauthorizedQuestion.WrongAnswer3
                     });
+
+                    var creator = context.UserSet.SingleOrDefault(x => x.Id == unauthorizedQuestion.CreatorId);
+                    if (creator != null)
+                    {
+                        creator.Points += 5;
+                        context.SaveChanges();
+                    }
+
                     context.UnauthorizedQuestionsSet.Remove(unauthorizedQuestion);
 
                     context.SaveChanges();

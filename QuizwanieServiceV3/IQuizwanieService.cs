@@ -34,7 +34,7 @@ namespace QuizwanieServiceV3
         void startLookingForGame(int userId);
 
         [OperationContract]
-        List<User> getUsersRanking();
+        List<User> getUsersRanking(string userName, string password);
 
         [OperationContract]
         bool isGameSearching(int userId);

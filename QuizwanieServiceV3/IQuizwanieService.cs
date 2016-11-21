@@ -39,6 +39,9 @@ namespace QuizwanieServiceV3
         [OperationContract]
         bool isGameSearching(int userId);
 
+        [OperationContract]
+        bool AddQuestion(string name, string password, string content, string correctAnswer, string wrongAnswer1, string wrongAnswer2, string wrongAnswer3);
+
         void authorizeQuestion(int id);
 
         [OperationContract]

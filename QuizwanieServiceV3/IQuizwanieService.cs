@@ -42,6 +42,7 @@ namespace QuizwanieServiceV3
         [OperationContract]
         bool AddQuestion(string name, string password, string content, string correctAnswer, string wrongAnswer1, string wrongAnswer2, string wrongAnswer3);
 
+        [OperationContract]
         bool AuthorizeQuestion(string userName, string password, int id);
 
         [OperationContract]

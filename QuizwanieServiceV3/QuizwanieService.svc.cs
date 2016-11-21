@@ -135,12 +135,62 @@ namespace QuizwanieServiceV3
             questionSet.WrongAnswer3 = wrongAnswer3;
             context.UnauthorizedQuestionsSet.Add(questionSet);
             context.SaveChanges();
+
             return true;
         }
 
-        public void authorizeQuestion(int id)
+        public List<Question> GetUnauthorizedQuestions(string userName, string password)
         {
+            List<Question> questions = new List<Question>();
+            User user = ValidateUser(userName, password);
+            if (user != null && user.Role.Equals("Admin"))
+            {
+                foreach (UnauthorizedQuestionsSet question in context.UnauthorizedQuestionsSet)
+                {
+                    questions.Add(new Question(question));
+                }
+            }
+            return questions;
+        }
 
+        public void DeleteUnauthorizeQuestion(string userName, string password, int id)
+        {
+            User user = ValidateUser(userName, password);
+            if (user != null && user.Role.Equals("Admin"))
+            {
+                UnauthorizedQuestionsSet question = context.UnauthorizedQuestionsSet.SingleOrDefault(x => x.Id == id);
+                if (question != null)
+                {
+                    context.UnauthorizedQuestionsSet.Remove(question);
+                }
+            }
+        }
+
+        public bool AuthorizeQuestion(string userName, string password, int id)
+        {
+            User user = ValidateUser(userName, password);
+            if (user != null)
+            {
+                var unauthorizedQuestion = context.UnauthorizedQuestionsSet.SingleOrDefault(x => x.Id == id);
+                if (unauthorizedQuestion != null)
+                {
+                    context.QuestionsSet.Add(new QuestionsSet
+                    {
+                        Content = unauthorizedQuestion.Content,
+                        CorrectAnswer = unauthorizedQuestion.CorrectAnswer,
+                        WrongAnswer1 = unauthorizedQuestion.WrongAnswer1,
+                        WrongAnswer2 = unauthorizedQuestion.WrongAnswer2,
+                        WrongAnswer3 = unauthorizedQuestion.WrongAnswer3
+                    });
+                    context.UnauthorizedQuestionsSet.Remove(unauthorizedQuestion);
+
+                    context.SaveChanges();
+
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         [WebGet]

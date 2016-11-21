@@ -42,7 +42,13 @@ namespace QuizwanieServiceV3
         [OperationContract]
         bool AddQuestion(string name, string password, string content, string correctAnswer, string wrongAnswer1, string wrongAnswer2, string wrongAnswer3);
 
-        void authorizeQuestion(int id);
+        bool AuthorizeQuestion(string userName, string password, int id);
+
+        [OperationContract]
+        List<Question> GetUnauthorizedQuestions(string userName, string password);
+
+        [OperationContract]
+        void DeleteUnauthorizeQuestion(string userName, string password, int id);
 
         [OperationContract]
         void fill();

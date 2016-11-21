@@ -120,7 +120,9 @@
     <Compile Include="Utils\DatabaseFiller.cs" />
     <Compile Include="Utils\SHA.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <WCFMetadata Include="Service References\" />
+  </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config" />
     <None Include="Web.Debug.config">

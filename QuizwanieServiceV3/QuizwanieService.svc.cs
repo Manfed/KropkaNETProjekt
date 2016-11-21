@@ -162,6 +162,7 @@ namespace QuizwanieServiceV3
                 if (question != null)
                 {
                     context.UnauthorizedQuestionsSet.Remove(question);
+                    context.SaveChanges();
                 }
             }
         }

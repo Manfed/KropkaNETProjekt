@@ -16,6 +16,9 @@ namespace QuizwanieServiceV3.Model
         public string Name { get; set; }
 
         [DataMember]
+        public string Password { get; set; }
+
+        [DataMember]
         public int Points { get; set; }
 
         [DataMember]
@@ -25,6 +28,7 @@ namespace QuizwanieServiceV3.Model
         {
             this.Id = user.Id;
             this.Name = user.Name;
+            this.Password = user.Password;
             this.Points = user.Points;
             this.Role = user.Role;
         }

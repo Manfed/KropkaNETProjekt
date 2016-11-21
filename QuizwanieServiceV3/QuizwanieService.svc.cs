@@ -121,6 +121,21 @@ namespace QuizwanieServiceV3
             return null;
         }
 
+        public void AddQuestion(string name, string password, string content, string correctAnswer, string wrongAnswer1, string wrongAnswer2, string wrongAnswer3)
+        {
+            User user = ValidateUser(name, password);
+            // nie pozwol niezalogowanym na wrzucanie pytan
+            if (user == null)
+                return;
+            UnauthorizedQuestionsSet questionSet = new UnauthorizedQuestionsSet();
+            questionSet.Content = content;
+            questionSet.CorrectAnswer = correctAnswer;
+            questionSet.WrongAnswer1 = wrongAnswer1;
+            questionSet.WrongAnswer2 = wrongAnswer2;
+            questionSet.WrongAnswer3 = wrongAnswer3;
+            context.UnauthorizedQuestionsSet.Add(questionSet);
+        }
+
         public void authorizeQuestion(int id)
         {
 
@@ -130,6 +145,11 @@ namespace QuizwanieServiceV3
         public void fill()
         {
             var fill = new DatabaseFiller();
+        }
+
+        private UserSet getUserSet(int userId)
+        {
+            return context.UserSet.SingleOrDefault(x => x.Id == userId);
         }
     }
 }

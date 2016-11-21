@@ -131,10 +131,5 @@ namespace QuizwanieServiceV3
         {
             var fill = new DatabaseFiller();
         }
-
-        private UserSet getUserSet(int userId)
-        {
-            return context.UserSet.SingleOrDefault(x => x.Id == userId);
-        }
     }
 }

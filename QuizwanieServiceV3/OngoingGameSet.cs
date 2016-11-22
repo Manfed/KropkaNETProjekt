@@ -17,6 +17,7 @@ namespace QuizwanieServiceV3
             CallerUserCorrectAnswers = 0;
             OpponentAnswerCount = 0;
             OpponentCorrectAnswers = 0;
+            IsGameOver = false;
         }
 
         public int Id { get; set; }
@@ -30,6 +31,8 @@ namespace QuizwanieServiceV3
         public int CallerUserAnswerCount { get; set; }
 
         public int OpponentAnswerCount { get; set; }
+
+        public bool IsGameOver { get; set; }
 
         public int User_Id { get; set; }
 

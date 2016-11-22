@@ -52,6 +52,15 @@ namespace QuizwanieServiceV3
         void DeleteUnauthorizeQuestion(string userName, string password, int id);
 
         [OperationContract]
+        List<OngoingGame> GetUserGames(string userName, string password, int userId);
+
+        [OperationContract]
+        void CheckAnswer(int gameId, int questionId, int userId, string answer);
+
+        [OperationContract]
+        Question GetNextQuestion(int gameId, int userId);
+
+        [OperationContract]
         void fill();
     }
 }

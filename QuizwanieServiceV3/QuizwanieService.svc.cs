@@ -65,8 +65,10 @@ namespace QuizwanieServiceV3
                 {
                     var firstPendingGame = context.PendingGameSet.First();
                     //Game start
-                    context.OngoingGameSet.Add(new OngoingGameSet { UserSet = firstPendingGame.UserSet, OpponentUserId = userId });
+                    var questions = Get5RandomQuestions();
+                    context.OngoingGameSet.Add(new OngoingGameSet { UserSet = firstPendingGame.UserSet, OpponentUserId = userId, QuestionsSet = questions });
                     context.PendingGameSet.Remove(firstPendingGame);
+                    context.SaveChanges();
                 }
             }
         }
@@ -207,6 +209,75 @@ namespace QuizwanieServiceV3
             return false;
         }
 
+        public List<OngoingGame> GetUserGames(string userName, string password, int userId)
+        {
+            List<OngoingGame> games = new List<OngoingGame>();
+            var user = ValidateUser(userName, password);
+
+            if (user != null && !user.Role.Equals("Admin"))
+            {
+                var selectedGames = context.OngoingGameSet.Where(x => (x.User_Id == userId || x.OpponentUserId == userId)).ToList();
+                foreach (OngoingGameSet game in selectedGames)
+                {
+                    games.Add(new OngoingGame(game));
+                }
+            }
+
+            return games;
+        }
+
+        public void CheckAnswer(int gameId, int questionId, int userId, string answer)
+        {
+            var game = context.OngoingGameSet.SingleOrDefault(x => x.Id == gameId);
+            if (game != null && !game.IsGameOver)
+            {
+                var question = context.QuestionsSet.SingleOrDefault(x => x.Id == questionId);
+                if (question != null)
+                {
+                    if (game.User_Id == userId)
+                    {
+                        if (question.CorrectAnswer.Equals(answer))
+                        {
+                            game.CallerUserCorrectAnswers++;
+                        }
+                        game.CallerUserAnswerCount++;
+                    }
+                    else
+                    {
+                        if (question.CorrectAnswer.Equals(answer))
+                        {
+                            game.OpponentCorrectAnswers++;
+                        }
+                        game.OpponentAnswerCount++;
+                    }
+                    if (game.OpponentAnswerCount == 5 && game.CallerUserAnswerCount == 5)
+                    {
+                        game.IsGameOver = true;
+                        RewardWinner(game);
+                    }
+                    context.SaveChanges();
+                }
+            }
+        }
+
+        public Question GetNextQuestion(int gameId, int userId)
+        {
+            Question nextQuestion = null;
+            var game = context.OngoingGameSet.SingleOrDefault(x => x.Id == gameId);
+            if (game != null && !game.IsGameOver)
+            {
+                if (userId == game.User_Id && game.CallerUserAnswerCount < 5)
+                {
+                    nextQuestion = new Question(game.QuestionsSet.ElementAt(game.CallerUserAnswerCount));
+                }
+                else if (userId == game.OpponentUserId && game.OpponentAnswerCount < 5) 
+                {
+                    nextQuestion = new Question(game.QuestionsSet.ElementAt(game.OpponentAnswerCount));
+                }
+            }
+            return nextQuestion;
+        }
+
         [WebGet]
         public void fill()
         {
@@ -216,6 +287,47 @@ namespace QuizwanieServiceV3
         private UserSet getUserSet(int userId)
         {
             return context.UserSet.SingleOrDefault(x => x.Id == userId);
+        }
+
+        private List<QuestionsSet> Get5RandomQuestions()
+        {
+            Random random = new Random();
+            return context.QuestionsSet.ToList().OrderBy(x => random.Next()).Take(5).ToList();
+        }
+
+        private void RewardWinner(OngoingGameSet game)
+        {
+            UserSet winner, loser;
+            int winnerReward, loserPunishment;
+            if (game.CallerUserCorrectAnswers > game.OpponentCorrectAnswers)
+            {
+                winner = context.UserSet.SingleOrDefault(x => x.Id == game.User_Id);
+                loser = context.UserSet.SingleOrDefault(x => x.Id == game.OpponentUserId);
+
+                winnerReward = 10 + 3 * game.CallerUserCorrectAnswers - 3 * (5 - game.CallerUserCorrectAnswers);
+                loserPunishment = -10 + 3 * game.OpponentCorrectAnswers - 3 * (5 - game.OpponentCorrectAnswers);
+            }
+            else if (game.OpponentCorrectAnswers > game.CallerUserCorrectAnswers)
+            {
+                winner = context.UserSet.SingleOrDefault(x => x.Id == game.OpponentUserId);
+                loser = context.UserSet.SingleOrDefault(x => x.Id == game.User_Id);
+
+                winnerReward = 10 + 3 * game.OpponentCorrectAnswers - 3 * (5 - game.OpponentCorrectAnswers);
+                loserPunishment = -10 + 3 * game.CallerUserCorrectAnswers - 3 * (5 - game.CallerUserCorrectAnswers);
+            }
+            else
+            {
+                winner = context.UserSet.SingleOrDefault(x => x.Id == game.User_Id);
+                loser = context.UserSet.SingleOrDefault(x => x.Id == game.OpponentUserId);
+
+                winnerReward = 10 + 3 * game.OpponentCorrectAnswers - 3 * (5 - game.OpponentCorrectAnswers);
+                loserPunishment = -10 + 3 * game.CallerUserCorrectAnswers - 3 * (5 - game.CallerUserCorrectAnswers);
+            }
+
+            winner.Points += winnerReward;
+            loser.Points += loserPunishment;
+
+            context.SaveChanges();
         }
     }
 }

@@ -326,7 +326,6 @@ namespace QuizwanieServiceV3
 
             winner.Points += winnerReward;
             loser.Points += loserPunishment;
-
             context.SaveChanges();
         }
     }
